@@ -44,5 +44,6 @@ pip install -r requirements.txt
 
 ```
 python run_dialog.py --task cabinet -llm Llama-3.1-70B-Instruct --skip_display
+python run_dialog.py --task sort -llm Llama-3.1-70B-Instruct --skip_display
 ```
 

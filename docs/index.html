@@ -95,10 +95,16 @@
           verified rounds as context for the next planning cycle.
         </li>
       </ul>
-      <p class="figure-placeholder" aria-hidden="true">
-        [ Figure&nbsp;1 &mdash; A2C-Collab architecture: Actor &rarr; Critic &rarr; Advantage Verifier
-        with short / long-term memory. See the paper for the full diagram. ]
-      </p>
+      <figure>
+        <img src="images/pipeline.png" alt="A2C-Collab architecture diagram with actor, critic, advantage verifier, and short/long-term memory.">
+        <figcaption>
+          Figure&nbsp;1. A2C-Collab coordinates robot arms using three LLMs
+          (LLM<sub>act</sub>, LLM<sub>crit</sub>, LLM<sub>adv</sub>) tied together by short- and
+          long-term memory. Collaborative discussion proposes actions, retrospective discussion
+          proposes corrections, and the advantage verifier accepts only revisions that improve
+          the plan.
+        </figcaption>
+      </figure>
     </section>
 
     <section id="results">
@@ -112,6 +118,14 @@
         Arrange Cabinet (0.40 &rarr; 0.53).
       </p>
 
+      <figure>
+        <img src="images/sim_results.png" alt="Simulation rollouts for the five RoCoBench tasks: Cabinet, Sort, Sweep, Rope, Sandwich.">
+        <figcaption>
+          Figure&nbsp;2. Simulation rollouts for the five RoCoBench tasks. Each row shows the
+          key steps performed by the multi-robot system.
+        </figcaption>
+      </figure>
+
       <h3>Real-world deployment</h3>
       <p>
         Deployed on UFactory 850 (6 DoF) and UFactory 7 (7 DoF) arms with a RealSense top-down camera
@@ -120,17 +134,20 @@
         (10 trials each).
       </p>
 
+      <figure>
+        <img src="images/real_results.png" alt="Real-world trial executions for Sort Block &amp; Toy and Move Block tasks on UFactory arms.">
+        <figcaption>
+          Figure&nbsp;3. Real-world trials on UFactory 850 and UFactory 7 arms for Sort Block
+          &amp; Toy and Move Block, with the generated plans shown beneath each step.
+        </figcaption>
+      </figure>
+
       <h3>Ablations</h3>
       <p>
         Two-round memory clearly outperforms single-round memory on multi-step tasks (Make Sandwich:
         0.07 &rarr; 0.33; Sort Cubes: 0.07 &rarr; 0.40). Model-size ablations on the critic and
         verifier confirm that the advantage-verification stage, not the actor's scale, drives the
         improvement.
-      </p>
-
-      <p class="figure-placeholder" aria-hidden="true">
-        [ Figures&nbsp;2&nbsp;&amp;&nbsp;3 &mdash; simulation rollouts and real-world experiment
-        setup. See the paper. ]
       </p>
     </section>
 

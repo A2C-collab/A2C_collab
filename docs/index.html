@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Integrating Advantage Actor-Critic in Multi-Robot Collaboration</title>
+  <meta name="description" content="A2C-Collab: an advantage actor-critic framework for multi-robot collaboration with LLM-based actor, critic, and advantage verifier.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header class="paper-header">
+      <h1>Integrating Advantage Actor-Critic in Multi-Robot Collaboration</h1>
+
+      <p class="venue">IEEE Robotics and Automation Letters</p>
+
+      <ol class="authors" aria-label="Authors">
+        <li>Jiazhao Liang<sup>&dagger;</sup></li>
+        <li>Hao Huang<sup>&dagger;*</sup></li>
+        <li>Yu Hao</li>
+        <li>Geeta Chandra Raju Bethala</li>
+        <li>Congcong Wen</li>
+        <li>Shuaihang Yuan</li>
+        <li>Anthony Tzes</li>
+        <li>Yi Fang<sup>*</sup></li>
+      </ol>
+
+      <p class="affiliations">
+        NYU Tandon School of Engineering &middot;
+        NYUAD Center for Artificial Intelligence and Robotics (CAIR) &middot;
+        Embodied AI and Robotics (AIR) Lab, NYU Abu Dhabi
+      </p>
+
+      <p class="contrib">
+        <sup>&dagger;</sup> Equal contribution &nbsp;&middot;&nbsp;
+        <sup>*</sup> Corresponding authors
+      </p>
+
+      <nav class="links" aria-label="Resources">
+        <!-- Drop the camera-ready PDF at docs/paper.pdf to activate this link. -->
+        <a href="./paper.pdf">Paper</a>
+        <a href="https://github.com/A2C-collab/A2C_collab">Code</a>
+        <a href="#citation">BibTeX</a>
+      </nav>
+    </header>
+
+    <section id="abstract">
+      <h2>Abstract</h2>
+      <p>
+        Recent advances in large language models (LLMs) have spurred interest in using these models
+        to coordinate multi-agent robot systems. However, existing approaches often fail to handle
+        dynamic and complex environments effectively. We present A2C-Collab, an advantage actor
+        critic framework tailored to multi-robot collaboration. A2C-Collab contains three major
+        components: (1) an actor generates time-critical commands for each robot to execute, and
+        (2) a critic monitors execution and recommends corrections when plans fail. (3) An advantage
+        mechanism verifies these corrections by forecasting their impact on subsequent environmental
+        dynamics. While previous methods primarily relied on the critic to enhance collaboration,
+        they often lacked a verification mechanism, allowing the critic to unintentionally guide
+        agents away from the correct goal. In contrast, our approach introduces an advantage
+        verification stage that anticipates and evaluates the impact of corrective actions before
+        execution, ensuring more reliable and goal-aligned coordination. The framework was first
+        evaluated in RoCoBench, a standard multi-robot simulation, and subsequently deployed to a
+        physical robot cluster. Across both settings, A2C-Collab improved task completion rates
+        compared with the state-of-the-art baselines, demonstrating robust performance and
+        highlighting the promise of LLM-driven reasoning in real-world multi-robot systems.
+      </p>
+    </section>
+
+    <section id="method">
+      <h2>Method</h2>
+      <p>
+        A2C-Collab adapts the advantage actor-critic paradigm to language-grounded multi-robot
+        coordination using three dedicated LLMs and a dual-memory structure:
+      </p>
+      <ul>
+        <li>
+          <strong>Actor (LLM<sub>act</sub>)</strong> &mdash; generates time-critical symbolic actions
+          (PICK, PLACE, MOVE, SWEEP, WAIT) for each robot from the current state, role, and shared goal.
+          Outputs are parsed to SE(3) waypoints and validated with inverse kinematics before execution.
+        </li>
+        <li>
+          <strong>Critic (LLM<sub>crit</sub>)</strong> &mdash; diagnoses execution failures from
+          environment feedback (e.g., IK errors, collisions) and proposes corrections.
+        </li>
+        <li>
+          <strong>Advantage Verifier (LLM<sub>adv</sub>)</strong> &mdash; estimates an advantage
+          score <em>&Acirc;<sub>t</sub><sup>i</sup> = Q<sub>&psi;</sub>(s<sub>t</sub>,
+          a<sub>t</sub><sup>i</sup> + &Delta;a<sub>t</sub><sup>i</sup>) &minus; V<sub>&phi;</sub>(s<sub>t</sub>)</em>
+          and only accepts corrections with positive advantage, preventing the critic from steering
+          agents away from the goal.
+        </li>
+        <li>
+          <strong>Dual memory</strong> &mdash; short-term memory <em>ST<sub>m</sub></em> stores the
+          current dialog round; long-term memory <em>LT<sub>m</sub></em> retains the two most recent
+          verified rounds as context for the next planning cycle.
+        </li>
+      </ul>
+      <p class="figure-placeholder" aria-hidden="true">
+        [ Figure&nbsp;1 &mdash; A2C-Collab architecture: Actor &rarr; Critic &rarr; Advantage Verifier
+        with short / long-term memory. See the paper for the full diagram. ]
+      </p>
+    </section>
+
+    <section id="results">
+      <h2>Results</h2>
+
+      <h3>RoCoBench simulation</h3>
+      <p>
+        Across five collaborative tasks (Cabinet, Sweep, Sandwich, Sort, Rope), A2C-Collab reaches
+        an average success rate of <strong>0.39</strong>, versus 0.31 for the actor-critic baseline
+        and 0.21 for RoCo, without increasing dialog steps or replans. The largest gain is on
+        Arrange Cabinet (0.40 &rarr; 0.53).
+      </p>
+
+      <h3>Real-world deployment</h3>
+      <p>
+        Deployed on UFactory 850 (6 DoF) and UFactory 7 (7 DoF) arms with a RealSense top-down camera
+        and OWL-ViT scene parsing, A2C-Collab achieves <strong>0.95 executable rate</strong> and
+        <strong>0.90 success rate</strong> averaged over Sort Block &amp; Toy and Move Block tasks
+        (10 trials each).
+      </p>
+
+      <h3>Ablations</h3>
+      <p>
+        Two-round memory clearly outperforms single-round memory on multi-step tasks (Make Sandwich:
+        0.07 &rarr; 0.33; Sort Cubes: 0.07 &rarr; 0.40). Model-size ablations on the critic and
+        verifier confirm that the advantage-verification stage, not the actor's scale, drives the
+        improvement.
+      </p>
+
+      <p class="figure-placeholder" aria-hidden="true">
+        [ Figures&nbsp;2&nbsp;&amp;&nbsp;3 &mdash; simulation rollouts and real-world experiment
+        setup. See the paper. ]
+      </p>
+    </section>
+
+    <section id="citation">
+      <h2>Citation</h2>
+      <p>If you find this work useful, please cite:</p>
+<pre><code>@article{liang2026a2ccollab,
+  title   = {Integrating Advantage Actor-Critic in Multi-Robot Collaboration},
+  author  = {Liang, Jiazhao and Huang, Hao and Hao, Yu and
+             Bethala, Geeta Chandra Raju and Wen, Congcong and
+             Yuan, Shuaihang and Tzes, Anthony and Fang, Yi},
+  journal = {IEEE Robotics and Automation Letters},
+  year    = {2026}
+}</code></pre>
+    </section>
+
+    <section id="code">
+      <h2>Code</h2>
+      <p>
+        Source code and instructions are available on GitHub.
+      </p>
+      <p>
+        <a class="cta" href="https://github.com/A2C-collab/A2C_collab">View repository &rarr;</a>
+      </p>
+    </section>
+
+    <footer>
+      <p>&copy; The authors. Page hosted via GitHub Pages.</p>
+    </footer>
+  </main>
+</body>
+</html>

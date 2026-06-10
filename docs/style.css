@@ -150,6 +150,43 @@ figcaption {
   text-align: center;
 }
 
+/* Video grid */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  margin: 20px 0 8px;
+}
+
+.video-item {
+  margin: 0;
+  text-align: center;
+}
+
+.video-item video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #000;
+}
+
+.video-item figcaption {
+  margin-top: 8px;
+  max-width: none;
+}
+
+/* A single wide video spans the full row */
+.video-wide {
+  grid-column: 1 / -1;
+}
+
+.video-wide video {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
 /* Citation */
 pre {
   background: var(--code-bg);
@@ -193,4 +230,5 @@ footer {
   main { padding: 36px 18px 60px; }
   .paper-header h1 { font-size: 1.45rem; }
   .authors { font-size: 0.95rem; }
+  .video-grid { grid-template-columns: 1fr; gap: 18px; }
 }
